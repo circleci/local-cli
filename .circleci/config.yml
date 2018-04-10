@@ -3,7 +3,13 @@ workflows:
   main:
     jobs:
       - build
-      - publish:
+      #- publish-snap:
+      #    requires:
+      #      - build
+      #    filters:
+      #      branches:
+      #        only: master
+      - publish-tarball:
           requires:
             - build
           filters:
@@ -18,15 +24,21 @@ jobs:
       - image: cibuilds/snapcraft:stable
     steps:
       - checkout
+      #- run:
+      #    name: "Build Snap"
+      #    command: snapcraft
       - run:
-          name: "Build Snap"
-          command: snapcraft
+          name: Generate tarball
+          command: |
+            VERSION=$(bash circleci.sh --version)
+            echo "Creating version ${VERSION}"
+            tar -czf circleci-${VERSION}.tar.gz circleci.sh
       - persist_to_workspace:
           root: .
           paths:
             - "*.snap"
 
-  publish:
+  publish-snap:
     docker:
       - image: cibuilds/snapcraft:stable
     steps:
@@ -38,3 +50,20 @@ jobs:
             mkdir .snapcraft
             echo $SNAPCRAFT_LOGIN_FILE | base64 --decode --ignore-garbage > .snapcraft/snapcraft.cfg
             snapcraft push *.snap --release stable
+
+
+
+  publish-tarball:
+    docker:
+      - image: circleci/golang:1.8
+    steps:
+      - attach_workspace:
+          at: .
+      - run:
+          name: Publish release on github (for homebrew)
+          command: |
+            go get github.com/tcnksm/ghr
+            VERSION=$(bash circleci.sh --version)
+            ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} v${VERSION} circleci-${VERSION}.tar.gz
+
+
