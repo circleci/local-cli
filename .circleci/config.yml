@@ -64,7 +64,8 @@ jobs:
           name: Publish release on github (for homebrew)
           command: |
             go get github.com/tcnksm/ghr
-            VERSION=$(ls *.tar.gz | sed -e 's/circleci-\([a-z0-9-]*\).tar.gz/\1/')
+            VERSION=$(ls *.tar.gz | sed -e 's/circleci-\([a-z0-9.-]*\)\.tar\.gz/\1/')
+            echo "Pushing version ${VERSION} to github releases"
             ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} v${VERSION} circleci-${VERSION}.tar.gz
 
 
