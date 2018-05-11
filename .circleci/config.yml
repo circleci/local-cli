@@ -39,7 +39,7 @@ jobs:
             - "*.snap"
             - "*.tar.gz"
       - store_artifacts:
-          path: circleci-${VERSION}.tar.gz
+          path: circleci-*.tar.gz
 
 
   publish-snap:
