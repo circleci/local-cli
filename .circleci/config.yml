@@ -38,6 +38,9 @@ jobs:
           paths:
             - "*.snap"
             - "*.tar.gz"
+      - store_artifacts:
+          path: circleci-${VERSION}.tar.gz
+
 
   publish-snap:
     docker:
@@ -67,5 +70,3 @@ jobs:
             VERSION=$(ls *.tar.gz | sed -e 's/circleci-\([a-z0-9.-]*\)\.tar\.gz/\1/')
             echo "Pushing version ${VERSION} to github releases"
             ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} v${VERSION} circleci-${VERSION}.tar.gz
-
-
