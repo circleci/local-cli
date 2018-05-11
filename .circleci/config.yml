@@ -24,9 +24,9 @@ jobs:
       - image: cibuilds/snapcraft:stable
     steps:
       - checkout
-      #- run:
-      #    name: "Build Snap"
-      #    command: snapcraft
+      - run:
+          name: "Build Snap"
+          command: snapcraft
       - run:
           name: Generate tarball
           command: |
