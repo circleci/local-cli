@@ -32,14 +32,17 @@ jobs:
           command: |
             VERSION=$(bash circleci.sh --version)
             echo "Creating version ${VERSION}"
-            tar -czf circleci-${VERSION}.tar.gz circleci.sh
+            mkdir artifacts
+            tar -czf artifacts/circleci-${VERSION}.tar.gz circleci.sh
       - persist_to_workspace:
           root: .
           paths:
             - "*.snap"
             - "*.tar.gz"
       - store_artifacts:
-          path: circleci-*.tar.gz
+          path: artifacts
+      - store_artifacts:
+          path: "artifacts/*.tar.gz"
 
 
   publish-snap:
