@@ -3,13 +3,13 @@ workflows:
   main:
     jobs:
       - build
-      #- publish-snap:
-      #    requires:
-      #      - build
-      #    filters:
-      #      branches:
-      #        only: master
-      - publish-tarball:
+      - publish-snap:
+          requires:
+            - build
+          filters:
+            branches:
+              only: master
+      - publish-github-releases:
           requires:
             - build
           filters:
@@ -30,15 +30,15 @@ jobs:
       - run:
           name: Generate tarball
           command: |
-            VERSION=$(bash circleci.sh --version)
+            VERSION="v$(bash circleci.sh --version)"
             echo "Creating version ${VERSION}"
-            tar -czf circleci-${VERSION}.tar.gz circleci.sh
+            tar -czf circleci_${VERSION}.tar.gz circleci.sh
       - run:
           name: Copy artifacts to folder
           command: |
             # store_artifacts doesnt seem to support expansion/interpolation
             mkdir artifacts
-            cp circleci-*.tar.gz artifacts/
+            cp circleci_v*.tar.gz artifacts/
             cp *.snap artifacts
       - persist_to_workspace:
           root: .
@@ -64,7 +64,7 @@ jobs:
 
 
 
-  publish-tarball:
+  publish-github-releases:
     docker:
       - image: circleci/golang:1.8
     steps:
@@ -74,6 +74,7 @@ jobs:
           name: Publish release on github (for homebrew)
           command: |
             go get github.com/tcnksm/ghr
-            VERSION=$(ls *.tar.gz | sed -e 's/circleci-\([a-z0-9.-]*\)\.tar\.gz/\1/')
-            echo "Pushing version ${VERSION} to github releases"
-            ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete v${VERSION} circleci-${VERSION}.tar.gz
+            VERSION=$(ls *.tar.gz | sed -e 's/circleci_\([a-z0-9.-]*\)\.tar\.gz/\1/')
+            echo "Pushing tarball and snap for version ${VERSION} to github releases"
+            ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${VERSION} circleci_*.tar.gz
+            ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${VERSION} circleci_*.snap
