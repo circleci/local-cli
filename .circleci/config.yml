@@ -76,5 +76,4 @@ jobs:
             go get github.com/tcnksm/ghr
             VERSION=$(ls *.tar.gz | sed -e 's/circleci_\([a-z0-9.-]*\)\.tar\.gz/\1/')
             echo "Pushing tarball and snap for version ${VERSION} to github releases"
-            ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${VERSION} circleci_*.tar.gz
-            ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${VERSION} circleci_*.snap
+            ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${VERSION} ./
