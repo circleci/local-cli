@@ -15,6 +15,9 @@ UNKNOWN_DIGEST=""
 
 CLI_VERSION="0.1.0"
 
+CIRCLECI_CLI_URL="https://raw.githubusercontent.com/CircleCI-Public/circleci-cli/master/install.sh"
+CIRCLECI_PREFIX="/usr/local/bin/circleci"
+
 # Pull `latest` tag from docker repo and write digest into the file
 pull_latest_image() {
   latest_image=$(docker pull $PICARD_REPO | grep -o "sha256.*$")
@@ -67,6 +70,27 @@ update_picard_cli() {
     cmd_prefix="sudo "
   fi
   bash -c "$cmd_prefix curl -o $PICARD_CLI_FILE $PICARD_CLI_URL --fail --silent --show-error && $cmd_prefix chmod +x $PICARD_CLI_FILE"
+}
+
+switch() {
+  echo "Thank you for your interest in trying the new CLI!"
+  echo ""
+  echo "Be sure to read the docs if you get stuck [LINK]."
+  echo ""
+  printf "Are you sure you're ready to upgrade? [Y/n]: "
+  read -r reply
+  if [ "$reply" == "Y" ]; then
+    echo "Upgrading CircleCI to the newest version."
+    if ! [[ -w $CIRCLECI_PREFIX ]]; then
+      echo "[WARN] Not enough permissions to write to $CIRCLECI_PREFIX, trying sudo..."
+      cmd_prefix="sudo "
+    fi
+    bash -c "curl $CIRCLECI_CLI_URL --fail --silent --show-error | $cmd_prefix bash"
+    exit 0
+  else
+    echo "Ok, please let us know when you're ready."
+    exit 0
+  fi
 }
 
 #
@@ -124,6 +148,10 @@ case $1 in
     update_current_digest $current_digest
     echo "Done"
     exit 0
+    ;;
+
+  switch )
+    switch
     ;;
 
   "" )
